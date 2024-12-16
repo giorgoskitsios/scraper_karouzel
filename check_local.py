@@ -1,11 +1,9 @@
 import time
-import gspread
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from google.oauth2.service_account import Credentials
 import pandas as pd
 
 USERNAME="054989280"
@@ -29,30 +27,7 @@ button.click()
 
 file_name = "output_test.xlsx"
 
-from google.oauth2.service_account import Credentials
-
-scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
-client = gspread.authorize(creds)
-
-sheet_id = ""
-sheet_name = "Zen"
-workbook = client.open_by_key(sheet_id)
-sheet = workbook.worksheet(sheet_name)
-
-# Specify the expected unique headers
-expected_headers = ["URL Προιόντος", "availability", "availability_update"]
-
-
-data = sheet.get_all_records(expected_headers=expected_headers)
-
-# Convert to Pandas DataFrame
-df = pd.DataFrame(data)
-columns_to_keep = ["URL Προιόντος", "availability", "availability_update"]
-df_filtered = df[columns_to_keep]
-
-# Print the DataFrame
-print(df_filtered)
+df = pd.read_excel(file_name)
 
 def check_availability_and_update(df, column_name):
     try:
@@ -93,12 +68,5 @@ def check_availability_and_update(df, column_name):
 
 df = check_availability_and_update(df, "URL Προιόντος")
 
-filtered_df = df[["availability", "availability_update"]]
-print(filtered_df)
-
-# Convert the filtered dataframe to a 2D list
-values = [["availability", "availability_update"]] + filtered_df.values.tolist()
-print(values)
-
-sheet.update(values, f"L1:M{len(values)}")
-print("Google Sheet file updated.")
+df.to_excel(file_name, index=False)
+print("Excel file updated.")
